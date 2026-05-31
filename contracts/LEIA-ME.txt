@@ -1,0 +1,35 @@
+═══════════════════════════════════════════════════════════
+  COMO USAR ESTA PASTA
+═══════════════════════════════════════════════════════════
+
+1. Coloque seu contrato modelo aqui com o nome EXATO:
+
+      modelo.pdf
+
+2. Avise o Claude que o arquivo está aqui.
+
+3. O Claude vai ler o conteúdo do PDF, identificar onde
+   entram os dados do cliente (nome, CPF, RG, endereço,
+   horário do evento, valor) e recriar o layout dentro do
+   sistema.
+
+4. Depois disso, no sistema, basta preencher os dados do
+   cliente e clicar em "Gerar contrato" — o PDF sai pronto
+   com a mesma cara do seu modelo.
+
+═══════════════════════════════════════════════════════════
+  CAMPOS QUE SERÃO PREENCHIDOS AUTOMATICAMENTE
+═══════════════════════════════════════════════════════════
+
+  • Nome completo do cliente
+  • CPF
+  • RG
+  • Endereço completo
+  • Início do evento (data + hora)
+  • Fim do evento (data + hora)
+  • Valor total
+
+Seus dados (Colly Eventos) ficam fixos — não precisa
+digitar de novo a cada contrato.
+
+═══════════════════════════════════════════════════════════

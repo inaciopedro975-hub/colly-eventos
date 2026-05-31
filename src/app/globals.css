@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+:root {
+  /* Light cream/beige base */
+  --bg-base: #faf8f3;
+  --bg-card: #ffffff;
+  --bg-soft: #f5f1ea;
+  --bg-soft-2: #ede7dc;
+  --bg-hover: #f0ebe0;
+
+  /* Borders refinadas (mais sutis em grupos de cards) */
+  --border-light: #f0ebe0;
+  --border: #e5e0d4;
+  --border-strong: #d4cdbe;
+
+  /* Text */
+  --text-primary: #2a2419;
+  --text-secondary: #6b5d47;
+  --text-muted: #9b8b73;
+
+  /* Amber accents (kept) */
+  --amber-50: #fef9ec;
+  --amber-100: #fef0c8;
+  --amber-200: #fae0a4;
+  --amber-300: #f5d07a;
+  --amber-400: #e8b84b;
+  --amber-500: #d4a017;
+  --amber-600: #b8860b;
+  --amber-700: #946708;
+
+  --accent: #d4a017;
+  --accent-hover: #b8860b;
+
+  /* Sombras consistentes */
+  --shadow-xs: 0 1px 2px 0 rgba(42, 36, 25, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(42, 36, 25, 0.06), 0 1px 2px -1px rgba(42, 36, 25, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(42, 36, 25, 0.08), 0 2px 4px -2px rgba(42, 36, 25, 0.04);
+  --shadow-lg: 0 12px 24px -6px rgba(42, 36, 25, 0.12), 0 4px 8px -4px rgba(42, 36, 25, 0.06);
+}
+
+@theme inline {
+  --color-bg-base: var(--bg-base);
+  --color-bg-card: var(--bg-card);
+  --color-bg-soft: var(--bg-soft);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-amber-gold: var(--amber-500);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --font-sans: var(--font-inter), "Segoe UI", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-inter), "Segoe UI", Arial, sans-serif;
+  font-feature-settings: "cv11", "ss01", "ss03"; /* refinamentos do Inter */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Números alinhados em colunas de valores (R$, contadores) */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Aplicado por padrão em headings e valores monetários */
+h1, h2, h3 {
+  letter-spacing: -0.015em;
+}
+
+/* Scrollbar mais discreto */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+  border: 2px solid var(--bg-base);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* Card padrão com micro-elevação suave no hover */
+.card-hover {
+  transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 180ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 180ms;
+}
+.card-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+/* FullCalendar Light Theme */
+.fc {
+  --fc-border-color: var(--border-light);
+  --fc-daygrid-event-dot-width: 8px;
+  --fc-today-bg-color: rgba(212, 160, 23, 0.08);
+  --fc-neutral-bg-color: var(--bg-soft);
+  --fc-list-event-hover-bg-color: var(--bg-soft);
+  --fc-page-bg-color: var(--bg-card);
+  --fc-small-font-size: 0.85em;
+  --fc-event-bg-color: var(--amber-500);
+  --fc-event-border-color: var(--amber-600);
+  --fc-event-text-color: #1a1208;
+  --fc-button-bg-color: #ffffff;
+  --fc-button-border-color: var(--border);
+  --fc-button-text-color: var(--text-secondary);
+  --fc-button-hover-bg-color: var(--bg-soft);
+  --fc-button-hover-border-color: var(--border-strong);
+  --fc-button-active-bg-color: var(--amber-500);
+  --fc-button-active-border-color: var(--amber-600);
+}
+
+.fc .fc-toolbar-title {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.fc .fc-col-header-cell-cushion,
+.fc .fc-daygrid-day-number {
+  color: var(--text-secondary);
+}
+
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background: var(--amber-500);
+  color: #1a1208;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.fc .fc-button {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.fc .fc-button:not(.fc-button-active) {
+  color: var(--text-secondary);
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid {
+  border-color: var(--border-light) !important;
+}
+
+input,
+select,
+textarea {
+  background-color: #ffffff;
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--amber-500);
+  box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.12);
+}

@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("staff")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  clientName  String
+  clientPhone String?
+  clientEmail String?
+  date        DateTime
+  timeStart   String?
+  timeEnd     String?
+  type        String   @default("casamento")
+  status      String   @default("confirmado")
+  notes       String?
+  value       Float?
+  guestCount  Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  unit        String      @default("un")
+  category    String      @default("geral")
+  active      Boolean     @default(true)
+  imageUrl    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  quoteItems  QuoteItem[]
+}
+
+model Quote {
+  id            Int         @id @default(autoincrement())
+  clientName    String
+  clientDoc     String?
+  clientAddress String?
+  clientPhone   String?
+  clientEmail   String?
+  eventDate     DateTime?
+  eventType     String?
+  guestCount    Int?
+  status        String      @default("rascunho")
+  notes         String?
+  paymentTerms  String?
+  validity      String?     @default("30 dias")
+  discount      Float       @default(0)
+  total         Float       @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         QuoteItem[]
+}
+
+model QuoteItem {
+  id        String  @id @default(cuid())
+  quoteId   Int
+  productId String
+  quantity  Float
+  unitPrice Float
+  total     Float
+  notes     String?
+  quote     Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Contract {
+  id                     String   @id @default(cuid())
+  type                   String   @default("decoracao") // "decoracao" | "locacao"
+  // Cliente
+  clientName             String
+  clientCpf              String
+  clientRg               String
+  clientAddress          String
+  // Evento
+  eventType              String   @default("casamento")
+  eventStart             DateTime // dia e hora de início
+  eventEnd               DateTime // dia e hora de término
+  eventLocation          String   @default("Colly Eventos, em Amparo/SP")
+  serviceDescription     String?  // Decoração — Cláusula 3ª: lista de serviços (texto livre)
+  // Pagamento
+  value                  Float
+  paymentSignalPct       Float    @default(20)
+  paymentInstallments    Int?     // nº de parcelas do saldo
+  paymentInstallmentValue Float?  // valor de cada parcela
+  extraHourValue         Float?   // Locação — Cláusula 4ª: valor da hora extra
+  // Assinatura
+  signCity               String   @default("Amparo")
+  signDate               DateTime
+  // Meta
+  notes                  String?
+  status                 String   @default("gerado") // "gerado" | "assinado" | "cancelado"
+  quoteId                Int?     // se veio de um orçamento aprovado
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model Transaction {
+  id                String   @id @default(cuid())
+  type              String   // "receita" | "despesa"
+  category          String   @default("outros")
+  description       String
+  amount            Float
+  date              DateTime
+  status            String   @default("recebido") // "recebido" | "pendente"
+  paymentMethod     String?  // "pix" | "dinheiro" | "cartao" | "transferencia" | "boleto"
+  notes             String?
+  installmentGroup  String?  // id do grupo de parcelas
+  installmentNum    Int?     // número da parcela (1, 2, 3...)
+  totalInstallments Int?     // total de parcelas
+  quoteId           Int?
+  eventId           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
