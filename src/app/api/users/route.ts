@@ -26,7 +26,9 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { name, email, password, userRole } = body;
+  const { name, password, userRole } = body;
+  // Normaliza o email (sempre minúsculo, sem espaços)
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
 
   if (!name || !email || !password) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });

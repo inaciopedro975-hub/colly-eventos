@@ -411,80 +411,86 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
             return (
               <div
                 key={c.id}
-                className="card-hover bg-white border border-[#ede7dc] rounded-xl px-5 py-4 flex items-center gap-4 group"
+                className="card-hover bg-white border border-[#ede7dc] rounded-xl p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 group"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#fef9ec] flex items-center justify-center flex-shrink-0">
-                  <FileText size={18} className="text-[#d4a017]" />
-                </div>
+                {/* Info principal + valor */}
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 rounded-lg bg-[#fef9ec] flex items-center justify-center flex-shrink-0">
+                    <FileText size={18} className="text-[#d4a017]" />
+                  </div>
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[#2a2419] truncate">{c.clientName}</p>
-                  <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${s.color}`}>
-                      {s.label}
-                    </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f5f1ea] text-[#6b5d47] font-medium">
-                      {TYPE_LABELS[c.type] ?? "Decoração"}
-                    </span>
-                    <span className="text-xs text-[#9b8b73] capitalize">{c.eventType}</span>
-                    <span className="text-xs text-[#9b8b73]">{formatDate(c.eventStart)}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-[#2a2419] truncate">{c.clientName}</p>
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${s.color}`}>
+                        {s.label}
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f5f1ea] text-[#6b5d47] font-medium">
+                        {TYPE_LABELS[c.type] ?? "Decoração"}
+                      </span>
+                      <span className="text-xs text-[#9b8b73] capitalize">{c.eventType}</span>
+                      <span className="text-xs text-[#9b8b73]">{formatDate(c.eventStart)}</span>
+                    </div>
+                  </div>
+
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-bold text-[#d4a017] text-base sm:text-lg tabular whitespace-nowrap">{formatCurrency(c.value)}</p>
+                    <p className="text-[10px] text-[#9b8b73] tabular whitespace-nowrap">criado {formatDate(c.createdAt)}</p>
                   </div>
                 </div>
 
-                <div className="text-right flex-shrink-0">
-                  <p className="font-bold text-[#d4a017] text-lg tabular">{formatCurrency(c.value)}</p>
-                  <p className="text-xs text-[#9b8b73] tabular">criado {formatDate(c.createdAt)}</p>
-                </div>
-
-                {/* Ações rápidas */}
-                {c.status === "gerado" && (
-                  <button
-                    onClick={() => changeStatus(c.id, "assinado")}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
-                    title="Marcar como assinado"
-                  >
-                    <Check size={13} /> Assinado
-                  </button>
-                )}
-                {c.status === "assinado" && (
-                  <button
-                    onClick={() => changeStatus(c.id, "gerado")}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#fef9ec] text-[#946708] border border-[#f0d060] hover:bg-[#fcf3d6] transition-colors"
-                    title="Voltar para gerado"
-                  >
-                    <Clock size={13} /> Reverter
-                  </button>
-                )}
-
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <a href={`/api/contracts/${c.id}/pdf`} target="_blank" rel="noopener noreferrer" title="Baixar PDF">
-                    <button className="p-2 rounded-lg text-[#9b8b73] hover:text-[#d4a017] hover:bg-[#fef9ec] transition-colors">
-                      <Download size={15} />
-                    </button>
-                  </a>
-                  <button
-                    onClick={() => openEdit(c)}
-                    className="p-2 rounded-lg text-[#9b8b73] hover:text-[#2a2419] hover:bg-[#f5f1ea] transition-colors"
-                    title="Editar"
-                  >
-                    <Edit size={15} />
-                  </button>
-                  {c.status !== "cancelado" && (
+                {/* Ações */}
+                <div className="flex items-center gap-1 justify-end flex-wrap border-t border-[#f5f1ea] pt-3 sm:border-t-0 sm:pt-0 sm:flex-shrink-0">
+                  {c.status === "gerado" && (
                     <button
-                      onClick={() => changeStatus(c.id, "cancelado")}
-                      className="p-2 rounded-lg text-[#9b8b73] hover:text-red-600 hover:bg-red-50 transition-colors"
-                      title="Cancelar"
+                      onClick={() => changeStatus(c.id, "assinado")}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                      title="Marcar como assinado"
                     >
-                      <X size={15} />
+                      <Check size={13} /> Assinado
                     </button>
                   )}
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    className="p-2 rounded-lg text-[#9b8b73] hover:text-red-700 hover:bg-red-50 transition-colors"
-                    title="Excluir"
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  {c.status === "assinado" && (
+                    <button
+                      onClick={() => changeStatus(c.id, "gerado")}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#fef9ec] text-[#946708] border border-[#f0d060] hover:bg-[#fcf3d6] transition-colors"
+                      title="Voltar para gerado"
+                    >
+                      <Clock size={13} /> Reverter
+                    </button>
+                  )}
+
+                  {/* Ícones: sempre visíveis no celular, aparecem no hover no desktop */}
+                  <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <a href={`/api/contracts/${c.id}/pdf`} target="_blank" rel="noopener noreferrer" title="Baixar PDF">
+                      <button className="p-2 rounded-lg text-[#9b8b73] hover:text-[#d4a017] hover:bg-[#fef9ec] transition-colors">
+                        <Download size={15} />
+                      </button>
+                    </a>
+                    <button
+                      onClick={() => openEdit(c)}
+                      className="p-2 rounded-lg text-[#9b8b73] hover:text-[#2a2419] hover:bg-[#f5f1ea] transition-colors"
+                      title="Editar"
+                    >
+                      <Edit size={15} />
+                    </button>
+                    {c.status !== "cancelado" && (
+                      <button
+                        onClick={() => changeStatus(c.id, "cancelado")}
+                        className="p-2 rounded-lg text-[#9b8b73] hover:text-red-600 hover:bg-red-50 transition-colors"
+                        title="Cancelar"
+                      >
+                        <X size={15} />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDelete(c.id)}
+                      className="p-2 rounded-lg text-[#9b8b73] hover:text-red-700 hover:bg-red-50 transition-colors"
+                      title="Excluir"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </div>
               </div>
             );

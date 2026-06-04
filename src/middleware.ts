@@ -7,7 +7,13 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token }) => {
+        if (!token) return false;
+        // Respeita o prazo do "Lembrar de mim": expira a sessão curta (12h)
+        const exp = (token as { expiresAt?: number }).expiresAt;
+        if (typeof exp === "number" && Date.now() > exp) return false;
+        return true;
+      },
     },
     pages: {
       signIn: "/login",

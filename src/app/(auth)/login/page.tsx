@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -19,8 +20,10 @@ export default function LoginPage() {
     setLoading(true);
 
     const res = await signIn("credentials", {
-      email,
+      // normaliza o email: ignora espaços e maiúsculas/minúsculas
+      email: email.trim().toLowerCase(),
       password,
+      remember: String(remember),
       redirect: false,
     });
 
@@ -89,6 +92,17 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+
+            {/* Lembrar de mim */}
+            <label className="flex items-center gap-2 cursor-pointer select-none pt-1">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="w-4 h-4 accent-[#d4a017] rounded"
+              />
+              <span className="text-sm text-[#6b5d47]">Manter-me conectado</span>
+            </label>
 
             {error && (
               <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
