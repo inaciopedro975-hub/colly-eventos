@@ -11,7 +11,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const body = await req.json();
   const { title, clientName, clientPhone, clientEmail, date, timeStart, timeEnd, type, status, notes, value, guestCount } = body;
 
-  const eventDate = new Date(date);
+  const eventDate = new Date(`${date}T12:00:00.000Z`);
 
   // Conflict check excluding this event
   const conflict = await prisma.event.findFirst({

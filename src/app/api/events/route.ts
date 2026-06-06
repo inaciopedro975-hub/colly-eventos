@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const eventDate = new Date(date);
+  const eventDate = new Date(`${date}T12:00:00.000Z`);
+
 
   // Conflict check server-side
   const conflict = await prisma.event.findFirst({
