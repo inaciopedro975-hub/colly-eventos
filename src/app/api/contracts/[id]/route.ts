@@ -21,10 +21,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const body = await req.json();
   const {
     type,
-    clientName, clientCpf, clientRg, clientAddress,
+    clientName, clientDocType, clientCpf, clientRg, clientAddress,
     eventType, eventStart, eventEnd, eventLocation,
     serviceDescription,
-    value, paymentSignalPct, paymentInstallments, paymentInstallmentValue, extraHourValue,
+    value, paymentSignalPct, paymentTerms, paymentInstallments, paymentInstallmentValue, extraHourValue,
     signCity, signDate,
     notes, status,
   } = body;
@@ -34,8 +34,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     data: {
       type: type === "locacao" ? "locacao" : "decoracao",
       clientName,
+      clientDocType: clientDocType === "cnpj" ? "cnpj" : "cpf",
       clientCpf,
-      clientRg,
+      clientRg: clientRg || "",
       clientAddress,
       eventType,
       eventStart: new Date(eventStart),
@@ -44,6 +45,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       serviceDescription: serviceDescription || null,
       value: parseFloat(value),
       paymentSignalPct: parseFloat(paymentSignalPct),
+      paymentTerms: paymentTerms || null,
       paymentInstallments: paymentInstallments ? parseInt(paymentInstallments) : null,
       paymentInstallmentValue: paymentInstallmentValue ? parseFloat(paymentInstallmentValue) : null,
       extraHourValue: extraHourValue ? parseFloat(extraHourValue) : null,

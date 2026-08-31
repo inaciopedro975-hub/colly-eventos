@@ -16,6 +16,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const pdfData = {
     type: contract.type,
     clientName: contract.clientName,
+    clientDocType: contract.clientDocType,
     clientCpf: contract.clientCpf,
     clientRg: contract.clientRg,
     clientAddress: contract.clientAddress,
@@ -26,6 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     serviceDescription: contract.serviceDescription,
     value: contract.value,
     paymentSignalPct: contract.paymentSignalPct,
+    paymentTerms: contract.paymentTerms,
     paymentInstallments: contract.paymentInstallments,
     paymentInstallmentValue: contract.paymentInstallmentValue,
     extraHourValue: contract.extraHourValue,

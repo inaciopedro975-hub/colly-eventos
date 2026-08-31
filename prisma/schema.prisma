@@ -88,8 +88,9 @@ model Contract {
   type                   String   @default("decoracao") // "decoracao" | "locacao"
   // Cliente
   clientName             String
-  clientCpf              String
-  clientRg               String
+  clientDocType          String   @default("cpf") // "cpf" (pessoa física) | "cnpj" (pessoa jurídica)
+  clientCpf              String   // CPF ou CNPJ, conforme clientDocType
+  clientRg               String   // RG ou Inscrição Estadual, conforme clientDocType
   clientAddress          String
   // Evento
   eventType              String   @default("casamento")
@@ -100,6 +101,7 @@ model Contract {
   // Pagamento
   value                  Float
   paymentSignalPct       Float    @default(20)
+  paymentTerms           String?  // Locação — Cláusula 3ª: forma de pagamento (texto livre)
   paymentInstallments    Int?     // nº de parcelas do saldo
   paymentInstallmentValue Float?  // valor de cada parcela
   extraHourValue         Float?   // Locação — Cláusula 4ª: valor da hora extra

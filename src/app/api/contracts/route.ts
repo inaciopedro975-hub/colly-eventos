@@ -20,19 +20,22 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
     type,
-    clientName, clientCpf, clientRg, clientAddress,
+    clientName, clientDocType, clientCpf, clientRg, clientAddress,
     eventType, eventStart, eventEnd, eventLocation,
     serviceDescription,
-    value, paymentSignalPct, paymentInstallments, paymentInstallmentValue, extraHourValue,
+    value, paymentSignalPct, paymentTerms, paymentInstallments, paymentInstallmentValue, extraHourValue,
     signCity, signDate,
     notes, quoteId,
   } = body;
 
   const contractType = type === "locacao" ? "locacao" : "decoracao";
+  const docType = clientDocType === "cnpj" ? "cnpj" : "cpf";
   // Serviços (Cláusula 3ª) só é obrigatório na decoração
   const missingServices = contractType === "decoracao" && !serviceDescription;
+  // RG é obrigatório para pessoa física; a Inscrição Estadual (PJ) pode ser isenta
+  const missingDoc = !clientCpf || (docType === "cpf" && !clientRg);
 
-  if (!clientName || !clientCpf || !clientRg || !clientAddress || !eventStart || !eventEnd || value === undefined || missingServices) {
+  if (!clientName || missingDoc || !clientAddress || !eventStart || !eventEnd || value === undefined || missingServices) {
     return NextResponse.json({ error: "Campos obrigatórios ausentes" }, { status: 400 });
   }
 
@@ -40,8 +43,9 @@ export async function POST(req: NextRequest) {
     data: {
       type: contractType,
       clientName,
+      clientDocType: docType,
       clientCpf,
-      clientRg,
+      clientRg: clientRg || "",
       clientAddress,
       eventType: eventType || "casamento",
       eventStart: new Date(eventStart),
@@ -50,6 +54,7 @@ export async function POST(req: NextRequest) {
       serviceDescription: serviceDescription || null,
       value: parseFloat(value),
       paymentSignalPct: paymentSignalPct !== undefined ? parseFloat(paymentSignalPct) : 20,
+      paymentTerms: paymentTerms || null,
       paymentInstallments: paymentInstallments ? parseInt(paymentInstallments) : null,
       paymentInstallmentValue: paymentInstallmentValue ? parseFloat(paymentInstallmentValue) : null,
       extraHourValue: extraHourValue ? parseFloat(extraHourValue) : null,

@@ -48,6 +48,7 @@ export type ContractMinAggregateOutputType = {
   id: string | null
   type: string | null
   clientName: string | null
+  clientDocType: string | null
   clientCpf: string | null
   clientRg: string | null
   clientAddress: string | null
@@ -58,6 +59,7 @@ export type ContractMinAggregateOutputType = {
   serviceDescription: string | null
   value: number | null
   paymentSignalPct: number | null
+  paymentTerms: string | null
   paymentInstallments: number | null
   paymentInstallmentValue: number | null
   extraHourValue: number | null
@@ -74,6 +76,7 @@ export type ContractMaxAggregateOutputType = {
   id: string | null
   type: string | null
   clientName: string | null
+  clientDocType: string | null
   clientCpf: string | null
   clientRg: string | null
   clientAddress: string | null
@@ -84,6 +87,7 @@ export type ContractMaxAggregateOutputType = {
   serviceDescription: string | null
   value: number | null
   paymentSignalPct: number | null
+  paymentTerms: string | null
   paymentInstallments: number | null
   paymentInstallmentValue: number | null
   extraHourValue: number | null
@@ -100,6 +104,7 @@ export type ContractCountAggregateOutputType = {
   id: number
   type: number
   clientName: number
+  clientDocType: number
   clientCpf: number
   clientRg: number
   clientAddress: number
@@ -110,6 +115,7 @@ export type ContractCountAggregateOutputType = {
   serviceDescription: number
   value: number
   paymentSignalPct: number
+  paymentTerms: number
   paymentInstallments: number
   paymentInstallmentValue: number
   extraHourValue: number
@@ -146,6 +152,7 @@ export type ContractMinAggregateInputType = {
   id?: true
   type?: true
   clientName?: true
+  clientDocType?: true
   clientCpf?: true
   clientRg?: true
   clientAddress?: true
@@ -156,6 +163,7 @@ export type ContractMinAggregateInputType = {
   serviceDescription?: true
   value?: true
   paymentSignalPct?: true
+  paymentTerms?: true
   paymentInstallments?: true
   paymentInstallmentValue?: true
   extraHourValue?: true
@@ -172,6 +180,7 @@ export type ContractMaxAggregateInputType = {
   id?: true
   type?: true
   clientName?: true
+  clientDocType?: true
   clientCpf?: true
   clientRg?: true
   clientAddress?: true
@@ -182,6 +191,7 @@ export type ContractMaxAggregateInputType = {
   serviceDescription?: true
   value?: true
   paymentSignalPct?: true
+  paymentTerms?: true
   paymentInstallments?: true
   paymentInstallmentValue?: true
   extraHourValue?: true
@@ -198,6 +208,7 @@ export type ContractCountAggregateInputType = {
   id?: true
   type?: true
   clientName?: true
+  clientDocType?: true
   clientCpf?: true
   clientRg?: true
   clientAddress?: true
@@ -208,6 +219,7 @@ export type ContractCountAggregateInputType = {
   serviceDescription?: true
   value?: true
   paymentSignalPct?: true
+  paymentTerms?: true
   paymentInstallments?: true
   paymentInstallmentValue?: true
   extraHourValue?: true
@@ -311,6 +323,7 @@ export type ContractGroupByOutputType = {
   id: string
   type: string
   clientName: string
+  clientDocType: string
   clientCpf: string
   clientRg: string
   clientAddress: string
@@ -321,6 +334,7 @@ export type ContractGroupByOutputType = {
   serviceDescription: string | null
   value: number
   paymentSignalPct: number
+  paymentTerms: string | null
   paymentInstallments: number | null
   paymentInstallmentValue: number | null
   extraHourValue: number | null
@@ -360,6 +374,7 @@ export type ContractWhereInput = {
   id?: Prisma.StringFilter<"Contract"> | string
   type?: Prisma.StringFilter<"Contract"> | string
   clientName?: Prisma.StringFilter<"Contract"> | string
+  clientDocType?: Prisma.StringFilter<"Contract"> | string
   clientCpf?: Prisma.StringFilter<"Contract"> | string
   clientRg?: Prisma.StringFilter<"Contract"> | string
   clientAddress?: Prisma.StringFilter<"Contract"> | string
@@ -370,6 +385,7 @@ export type ContractWhereInput = {
   serviceDescription?: Prisma.StringNullableFilter<"Contract"> | string | null
   value?: Prisma.FloatFilter<"Contract"> | number
   paymentSignalPct?: Prisma.FloatFilter<"Contract"> | number
+  paymentTerms?: Prisma.StringNullableFilter<"Contract"> | string | null
   paymentInstallments?: Prisma.IntNullableFilter<"Contract"> | number | null
   paymentInstallmentValue?: Prisma.FloatNullableFilter<"Contract"> | number | null
   extraHourValue?: Prisma.FloatNullableFilter<"Contract"> | number | null
@@ -386,6 +402,7 @@ export type ContractOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   clientName?: Prisma.SortOrder
+  clientDocType?: Prisma.SortOrder
   clientCpf?: Prisma.SortOrder
   clientRg?: Prisma.SortOrder
   clientAddress?: Prisma.SortOrder
@@ -396,6 +413,7 @@ export type ContractOrderByWithRelationInput = {
   serviceDescription?: Prisma.SortOrderInput | Prisma.SortOrder
   value?: Prisma.SortOrder
   paymentSignalPct?: Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentInstallments?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentInstallmentValue?: Prisma.SortOrderInput | Prisma.SortOrder
   extraHourValue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -415,6 +433,7 @@ export type ContractWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ContractWhereInput | Prisma.ContractWhereInput[]
   type?: Prisma.StringFilter<"Contract"> | string
   clientName?: Prisma.StringFilter<"Contract"> | string
+  clientDocType?: Prisma.StringFilter<"Contract"> | string
   clientCpf?: Prisma.StringFilter<"Contract"> | string
   clientRg?: Prisma.StringFilter<"Contract"> | string
   clientAddress?: Prisma.StringFilter<"Contract"> | string
@@ -425,6 +444,7 @@ export type ContractWhereUniqueInput = Prisma.AtLeast<{
   serviceDescription?: Prisma.StringNullableFilter<"Contract"> | string | null
   value?: Prisma.FloatFilter<"Contract"> | number
   paymentSignalPct?: Prisma.FloatFilter<"Contract"> | number
+  paymentTerms?: Prisma.StringNullableFilter<"Contract"> | string | null
   paymentInstallments?: Prisma.IntNullableFilter<"Contract"> | number | null
   paymentInstallmentValue?: Prisma.FloatNullableFilter<"Contract"> | number | null
   extraHourValue?: Prisma.FloatNullableFilter<"Contract"> | number | null
@@ -441,6 +461,7 @@ export type ContractOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   clientName?: Prisma.SortOrder
+  clientDocType?: Prisma.SortOrder
   clientCpf?: Prisma.SortOrder
   clientRg?: Prisma.SortOrder
   clientAddress?: Prisma.SortOrder
@@ -451,6 +472,7 @@ export type ContractOrderByWithAggregationInput = {
   serviceDescription?: Prisma.SortOrderInput | Prisma.SortOrder
   value?: Prisma.SortOrder
   paymentSignalPct?: Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentInstallments?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentInstallmentValue?: Prisma.SortOrderInput | Prisma.SortOrder
   extraHourValue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -475,6 +497,7 @@ export type ContractScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Contract"> | string
   type?: Prisma.StringWithAggregatesFilter<"Contract"> | string
   clientName?: Prisma.StringWithAggregatesFilter<"Contract"> | string
+  clientDocType?: Prisma.StringWithAggregatesFilter<"Contract"> | string
   clientCpf?: Prisma.StringWithAggregatesFilter<"Contract"> | string
   clientRg?: Prisma.StringWithAggregatesFilter<"Contract"> | string
   clientAddress?: Prisma.StringWithAggregatesFilter<"Contract"> | string
@@ -485,6 +508,7 @@ export type ContractScalarWhereWithAggregatesInput = {
   serviceDescription?: Prisma.StringNullableWithAggregatesFilter<"Contract"> | string | null
   value?: Prisma.FloatWithAggregatesFilter<"Contract"> | number
   paymentSignalPct?: Prisma.FloatWithAggregatesFilter<"Contract"> | number
+  paymentTerms?: Prisma.StringNullableWithAggregatesFilter<"Contract"> | string | null
   paymentInstallments?: Prisma.IntNullableWithAggregatesFilter<"Contract"> | number | null
   paymentInstallmentValue?: Prisma.FloatNullableWithAggregatesFilter<"Contract"> | number | null
   extraHourValue?: Prisma.FloatNullableWithAggregatesFilter<"Contract"> | number | null
@@ -501,6 +525,7 @@ export type ContractCreateInput = {
   id?: string
   type?: string
   clientName: string
+  clientDocType?: string
   clientCpf: string
   clientRg: string
   clientAddress: string
@@ -511,6 +536,7 @@ export type ContractCreateInput = {
   serviceDescription?: string | null
   value: number
   paymentSignalPct?: number
+  paymentTerms?: string | null
   paymentInstallments?: number | null
   paymentInstallmentValue?: number | null
   extraHourValue?: number | null
@@ -527,6 +553,7 @@ export type ContractUncheckedCreateInput = {
   id?: string
   type?: string
   clientName: string
+  clientDocType?: string
   clientCpf: string
   clientRg: string
   clientAddress: string
@@ -537,6 +564,7 @@ export type ContractUncheckedCreateInput = {
   serviceDescription?: string | null
   value: number
   paymentSignalPct?: number
+  paymentTerms?: string | null
   paymentInstallments?: number | null
   paymentInstallmentValue?: number | null
   extraHourValue?: number | null
@@ -553,6 +581,7 @@ export type ContractUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   clientName?: Prisma.StringFieldUpdateOperationsInput | string
+  clientDocType?: Prisma.StringFieldUpdateOperationsInput | string
   clientCpf?: Prisma.StringFieldUpdateOperationsInput | string
   clientRg?: Prisma.StringFieldUpdateOperationsInput | string
   clientAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -563,6 +592,7 @@ export type ContractUpdateInput = {
   serviceDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   value?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentSignalPct?: Prisma.FloatFieldUpdateOperationsInput | number
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentInstallments?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paymentInstallmentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   extraHourValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -579,6 +609,7 @@ export type ContractUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   clientName?: Prisma.StringFieldUpdateOperationsInput | string
+  clientDocType?: Prisma.StringFieldUpdateOperationsInput | string
   clientCpf?: Prisma.StringFieldUpdateOperationsInput | string
   clientRg?: Prisma.StringFieldUpdateOperationsInput | string
   clientAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -589,6 +620,7 @@ export type ContractUncheckedUpdateInput = {
   serviceDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   value?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentSignalPct?: Prisma.FloatFieldUpdateOperationsInput | number
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentInstallments?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paymentInstallmentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   extraHourValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -605,6 +637,7 @@ export type ContractCreateManyInput = {
   id?: string
   type?: string
   clientName: string
+  clientDocType?: string
   clientCpf: string
   clientRg: string
   clientAddress: string
@@ -615,6 +648,7 @@ export type ContractCreateManyInput = {
   serviceDescription?: string | null
   value: number
   paymentSignalPct?: number
+  paymentTerms?: string | null
   paymentInstallments?: number | null
   paymentInstallmentValue?: number | null
   extraHourValue?: number | null
@@ -631,6 +665,7 @@ export type ContractUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   clientName?: Prisma.StringFieldUpdateOperationsInput | string
+  clientDocType?: Prisma.StringFieldUpdateOperationsInput | string
   clientCpf?: Prisma.StringFieldUpdateOperationsInput | string
   clientRg?: Prisma.StringFieldUpdateOperationsInput | string
   clientAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -641,6 +676,7 @@ export type ContractUpdateManyMutationInput = {
   serviceDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   value?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentSignalPct?: Prisma.FloatFieldUpdateOperationsInput | number
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentInstallments?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paymentInstallmentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   extraHourValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -657,6 +693,7 @@ export type ContractUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   clientName?: Prisma.StringFieldUpdateOperationsInput | string
+  clientDocType?: Prisma.StringFieldUpdateOperationsInput | string
   clientCpf?: Prisma.StringFieldUpdateOperationsInput | string
   clientRg?: Prisma.StringFieldUpdateOperationsInput | string
   clientAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -667,6 +704,7 @@ export type ContractUncheckedUpdateManyInput = {
   serviceDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   value?: Prisma.FloatFieldUpdateOperationsInput | number
   paymentSignalPct?: Prisma.FloatFieldUpdateOperationsInput | number
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentInstallments?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paymentInstallmentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   extraHourValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -683,6 +721,7 @@ export type ContractCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   clientName?: Prisma.SortOrder
+  clientDocType?: Prisma.SortOrder
   clientCpf?: Prisma.SortOrder
   clientRg?: Prisma.SortOrder
   clientAddress?: Prisma.SortOrder
@@ -693,6 +732,7 @@ export type ContractCountOrderByAggregateInput = {
   serviceDescription?: Prisma.SortOrder
   value?: Prisma.SortOrder
   paymentSignalPct?: Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrder
   paymentInstallments?: Prisma.SortOrder
   paymentInstallmentValue?: Prisma.SortOrder
   extraHourValue?: Prisma.SortOrder
@@ -718,6 +758,7 @@ export type ContractMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   clientName?: Prisma.SortOrder
+  clientDocType?: Prisma.SortOrder
   clientCpf?: Prisma.SortOrder
   clientRg?: Prisma.SortOrder
   clientAddress?: Prisma.SortOrder
@@ -728,6 +769,7 @@ export type ContractMaxOrderByAggregateInput = {
   serviceDescription?: Prisma.SortOrder
   value?: Prisma.SortOrder
   paymentSignalPct?: Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrder
   paymentInstallments?: Prisma.SortOrder
   paymentInstallmentValue?: Prisma.SortOrder
   extraHourValue?: Prisma.SortOrder
@@ -744,6 +786,7 @@ export type ContractMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   type?: Prisma.SortOrder
   clientName?: Prisma.SortOrder
+  clientDocType?: Prisma.SortOrder
   clientCpf?: Prisma.SortOrder
   clientRg?: Prisma.SortOrder
   clientAddress?: Prisma.SortOrder
@@ -754,6 +797,7 @@ export type ContractMinOrderByAggregateInput = {
   serviceDescription?: Prisma.SortOrder
   value?: Prisma.SortOrder
   paymentSignalPct?: Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrder
   paymentInstallments?: Prisma.SortOrder
   paymentInstallmentValue?: Prisma.SortOrder
   extraHourValue?: Prisma.SortOrder
@@ -781,6 +825,7 @@ export type ContractSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id?: boolean
   type?: boolean
   clientName?: boolean
+  clientDocType?: boolean
   clientCpf?: boolean
   clientRg?: boolean
   clientAddress?: boolean
@@ -791,6 +836,7 @@ export type ContractSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   serviceDescription?: boolean
   value?: boolean
   paymentSignalPct?: boolean
+  paymentTerms?: boolean
   paymentInstallments?: boolean
   paymentInstallmentValue?: boolean
   extraHourValue?: boolean
@@ -807,6 +853,7 @@ export type ContractSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   id?: boolean
   type?: boolean
   clientName?: boolean
+  clientDocType?: boolean
   clientCpf?: boolean
   clientRg?: boolean
   clientAddress?: boolean
@@ -817,6 +864,7 @@ export type ContractSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   serviceDescription?: boolean
   value?: boolean
   paymentSignalPct?: boolean
+  paymentTerms?: boolean
   paymentInstallments?: boolean
   paymentInstallmentValue?: boolean
   extraHourValue?: boolean
@@ -833,6 +881,7 @@ export type ContractSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   id?: boolean
   type?: boolean
   clientName?: boolean
+  clientDocType?: boolean
   clientCpf?: boolean
   clientRg?: boolean
   clientAddress?: boolean
@@ -843,6 +892,7 @@ export type ContractSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   serviceDescription?: boolean
   value?: boolean
   paymentSignalPct?: boolean
+  paymentTerms?: boolean
   paymentInstallments?: boolean
   paymentInstallmentValue?: boolean
   extraHourValue?: boolean
@@ -859,6 +909,7 @@ export type ContractSelectScalar = {
   id?: boolean
   type?: boolean
   clientName?: boolean
+  clientDocType?: boolean
   clientCpf?: boolean
   clientRg?: boolean
   clientAddress?: boolean
@@ -869,6 +920,7 @@ export type ContractSelectScalar = {
   serviceDescription?: boolean
   value?: boolean
   paymentSignalPct?: boolean
+  paymentTerms?: boolean
   paymentInstallments?: boolean
   paymentInstallmentValue?: boolean
   extraHourValue?: boolean
@@ -881,7 +933,7 @@ export type ContractSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ContractOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "clientName" | "clientCpf" | "clientRg" | "clientAddress" | "eventType" | "eventStart" | "eventEnd" | "eventLocation" | "serviceDescription" | "value" | "paymentSignalPct" | "paymentInstallments" | "paymentInstallmentValue" | "extraHourValue" | "signCity" | "signDate" | "notes" | "status" | "quoteId" | "createdAt" | "updatedAt", ExtArgs["result"]["contract"]>
+export type ContractOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "clientName" | "clientDocType" | "clientCpf" | "clientRg" | "clientAddress" | "eventType" | "eventStart" | "eventEnd" | "eventLocation" | "serviceDescription" | "value" | "paymentSignalPct" | "paymentTerms" | "paymentInstallments" | "paymentInstallmentValue" | "extraHourValue" | "signCity" | "signDate" | "notes" | "status" | "quoteId" | "createdAt" | "updatedAt", ExtArgs["result"]["contract"]>
 
 export type $ContractPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Contract"
@@ -890,6 +942,7 @@ export type $ContractPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     id: string
     type: string
     clientName: string
+    clientDocType: string
     clientCpf: string
     clientRg: string
     clientAddress: string
@@ -900,6 +953,7 @@ export type $ContractPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     serviceDescription: string | null
     value: number
     paymentSignalPct: number
+    paymentTerms: string | null
     paymentInstallments: number | null
     paymentInstallmentValue: number | null
     extraHourValue: number | null
@@ -1336,6 +1390,7 @@ export interface ContractFieldRefs {
   readonly id: Prisma.FieldRef<"Contract", 'String'>
   readonly type: Prisma.FieldRef<"Contract", 'String'>
   readonly clientName: Prisma.FieldRef<"Contract", 'String'>
+  readonly clientDocType: Prisma.FieldRef<"Contract", 'String'>
   readonly clientCpf: Prisma.FieldRef<"Contract", 'String'>
   readonly clientRg: Prisma.FieldRef<"Contract", 'String'>
   readonly clientAddress: Prisma.FieldRef<"Contract", 'String'>
@@ -1346,6 +1401,7 @@ export interface ContractFieldRefs {
   readonly serviceDescription: Prisma.FieldRef<"Contract", 'String'>
   readonly value: Prisma.FieldRef<"Contract", 'Float'>
   readonly paymentSignalPct: Prisma.FieldRef<"Contract", 'Float'>
+  readonly paymentTerms: Prisma.FieldRef<"Contract", 'String'>
   readonly paymentInstallments: Prisma.FieldRef<"Contract", 'Int'>
   readonly paymentInstallmentValue: Prisma.FieldRef<"Contract", 'Float'>
   readonly extraHourValue: Prisma.FieldRef<"Contract", 'Float'>

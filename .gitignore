@@ -44,6 +44,9 @@ next-env.d.ts
 *.sqlite
 dev.db
 
+# Backups do banco (NUNCA commitar — contém CPF/RG/dados de clientes)
+/backups
+
 # Modelos/extrações de contratos (podem conter dados reais de clientes)
 /contracts/*.pdf
 /contracts/*.docx

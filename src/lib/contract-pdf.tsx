@@ -9,8 +9,9 @@ import {
 export interface ContractPDFData {
   type?: string; // "decoracao" | "locacao"
   clientName: string;
-  clientCpf: string;
-  clientRg: string;
+  clientDocType?: string | null; // "cpf" (pessoa física) | "cnpj" (pessoa jurídica)
+  clientCpf: string; // CPF ou CNPJ, conforme clientDocType
+  clientRg: string; // RG ou Inscrição Estadual, conforme clientDocType
   clientAddress: string;
   eventType: string;
   eventStart: Date;
@@ -19,6 +20,7 @@ export interface ContractPDFData {
   serviceDescription?: string | null;
   value: number;
   paymentSignalPct: number;
+  paymentTerms?: string | null;
   paymentInstallments?: number | null;
   paymentInstallmentValue?: number | null;
   extraHourValue?: number | null;
@@ -123,7 +125,34 @@ function fmtSignDate(d: Date) {
     "janeiro", "fevereiro", "março", "abril", "maio", "junho",
     "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
   ];
-  return `${d.getDate()} de ${months[d.getMonth()]} ${d.getFullYear()}`;
+  return `${d.getDate()} de ${months[d.getMonth()]} de ${d.getFullYear()}`;
+}
+
+function isPJ(data: ContractPDFData) {
+  return data.clientDocType === "cnpj";
+}
+
+/**
+ * Qualificação do cliente após o nome, conforme pessoa física ou jurídica.
+ * PF:  "portador(a) do RG nº ..., devidamente inscrito(a) no CPF nº ..., residente e domiciliado(a) na ..."
+ * PJ:  "inscrita no CNPJ sob nº ... e I.E nº ..., com sede na ..."   (mesma redação usada para a LOCADORA)
+ */
+function ClientQualification({ data }: { data: ContractPDFData }) {
+  if (isPJ(data)) {
+    const ie = data.clientRg?.trim();
+    return (
+      <Text>
+        pessoa jurídica de direito privado, inscrita no CNPJ sob nº {data.clientCpf}
+        {ie ? ` e I.E nº ${ie}` : ""}, com sede na {data.clientAddress}.
+      </Text>
+    );
+  }
+  return (
+    <Text>
+      portador(a) do RG nº {data.clientRg}, devidamente inscrito(a) no CPF nº {data.clientCpf},
+      residente e domiciliado(a) na {data.clientAddress}.
+    </Text>
+  );
 }
 
 export function ContractPDF({ data }: { data: ContractPDFData }) {
@@ -155,8 +184,7 @@ function DecoracaoContract({ data }: { data: ContractPDFData }) {
 
         <Text style={styles.paragraph}>
           <Text style={styles.clauseLabel}>CONTRATANTE; {data.clientName.toUpperCase()}, </Text>
-          portador(a) do RG nº {data.clientRg}, devidamente inscrito(a) no CPF nº {data.clientCpf},
-          residente e domiciliado(a) na {data.clientAddress}.
+          <ClientQualification data={data} />
         </Text>
 
         <Text style={styles.intro}>
@@ -367,6 +395,11 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
     ? fmtCurrency(data.extraHourValue)
     : "R$ __________";
 
+  // Cláusula 3ª: forma de pagamento em texto livre; se vazia, monta a partir do sinal.
+  const rawPayment = data.paymentTerms?.trim()
+    || `entrada de ${data.paymentSignalPct}% (${fmtCurrency(signalValue)}) e o restante parcelado`;
+  const paymentTxt = /[.;!?]$/.test(rawPayment) ? rawPayment : `${rawPayment}.`;
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -376,15 +409,16 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
         <Text style={styles.sectionHeader}>PARTES</Text>
 
         <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>LOCADORA: LUCINÉIA APARECIDA DA SILVA INÁCIO, </Text>
-          brasileira, casada, do lar, inscrita no RG sob nº 46.939.636-2/SSP/SP e CPF nº 289.853.288-87,
-          residente e domiciliada na Chácara Colly Eventos (fundos), situada na Estrada dos Pereiras, em Amparo/SP.
+          <Text style={styles.clauseLabel}>LOCADORA: LUCINÉIA APARECIDA DA SILVA INÁCIO MEI, </Text>
+          inscrita no CNPJ sob nº 26.209.953/0001-58 e I. E nº 168091340118, Chácara Colly Eventos,
+          situada na Estrada dos Pereiras, em Amparo/SP.
         </Text>
 
         <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>LOCATÁRIO(A): {data.clientName.toUpperCase()}, </Text>
-          portador(a) do RG nº {data.clientRg}, devidamente inscrito(a) no CPF nº {data.clientCpf},
-          residente e domiciliado(a) na {data.clientAddress}.
+          <Text style={styles.clauseLabel}>
+            {isPJ(data) ? "LOCATÁRIA: " : "LOCATÁRIO(A): "}{data.clientName.toUpperCase()},{" "}
+          </Text>
+          <ClientQualification data={data} />
         </Text>
 
         <Text style={styles.paragraph}>
@@ -417,8 +451,7 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
         <Text style={styles.paragraph}>
           <Text style={styles.clauseLabel}>Cláusula 3ª. </Text>
           O valor do aluguel é de {fmtCurrency(data.value)} que o LOCATÁRIO se compromete a pagar da seguinte forma:
-          entrada de {data.paymentSignalPct}% ({fmtCurrency(signalValue)}) no ato da assinatura e o restante em até
-          30 dias antes da data do evento.
+          {" "}{paymentTxt}
         </Text>
 
         <Text style={styles.paragraph}>
@@ -440,12 +473,10 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
 
         <Text style={styles.paragraph}>
           <Text style={styles.clauseLabel}>Cláusula 6ª. </Text>
-          No caso da rescisão contratual ocorrer por parte do LOCATÁRIO em até 12 meses antes do evento, este terá
-          direito à restituição dos valores pagos até o momento da rescisão, sendo retida uma multa compensatória no
-          valor de R$ 1.000,00 (um mil reais). No caso da rescisão ocorrer no prazo inferior a 12 meses da data contratada,
-          não haverá restituição dos valores já pagos pelo LOCATÁRIO até o momento da rescisão. Será aplicada uma multa
-          mínima de R$ 1.500,00 (um mil e quinhentos reais) a título de compensação, caso os valores pagos pelo LOCATÁRIO
-          até a rescisão sejam inferiores a esse montante. As parcelas vencidas e não quitadas deverão ser pagas na ocasião.
+          No caso da rescisão contratual ocorrer por parte do LOCATÁRIO em até 12 meses antes do evento, o valor das
+          parcelas pagas deverá ser restituído. No caso da rescisão ocorrer no prazo inferior a 12 meses da data
+          contratada, não haverá restituição dos valores já pagos pelo LOCATÁRIO até o momento da rescisão. As parcelas
+          vencidas e não quitadas deverão ser pagas na ocasião.
         </Text>
 
         <Text style={styles.sectionHeader}>CONSERVAÇÃO DO IMÓVEL</Text>
@@ -458,7 +489,8 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
         <Text style={styles.paragraph}>
           <Text style={styles.clauseLabel}>Parágrafo primeiro. </Text>
           O LOCATÁRIO declara ter vistoriado o imóvel antes da locação, verificando pessoalmente encontrar-se o mesmo
-          de acordo com o Termo de vistoria e fotos em anexo. Obriga-se a restituir o imóvel finda a locação, no estado
+          de acordo com o Termo de vistoria e fotos em anexo, momento em que serão esclarecidas todas as dúvidas quanto
+          ao uso, capacidade e disponibilidades. Obriga-se a restituir o imóvel finda a locação, no estado
           em que recebeu, salvo as deteriorações decorrentes do seu uso normal. Após o término da locação, LOCATÁRIO e
           LOCADOR, ou quem este último indicar, vistoriarão o imóvel, suas dependências e utensílios, para apuração de
           danos ocorridos. Caso haja recusa do Locatário em assinar a vistoria final, o Locador providenciará a assinatura
@@ -556,7 +588,8 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
         <Text style={styles.paragraph}>
           <Text style={styles.clauseLabel}>Parágrafo 2º. </Text>
           O LOCADOR fornecerá: a) materiais de limpeza como sabão, desinfetante e pano de chão ou de prato, papel
-          higiênico, sanito e sabonete para as mãos; b) 20 mesas, 200 cadeiras, 04 bistrôs e toalhas de mesa.
+          higiênico, sanito e sabonete para as mãos; b) 20 mesas, 200 cadeiras, toalhas e uma pessoa responsável pela
+          limpeza dos banheiros durante o evento.
         </Text>
         <Text style={styles.paragraph}>
           <Text style={styles.clauseLabel}>Parágrafo 3º. </Text>
@@ -617,9 +650,9 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
         </Text>
 
         <Text style={styles.intro}>
-          Assim, por estarem justos e contratados, assinam o presente contrato em 02 (duas) vias de igual teor,
-          destinando-se uma via para cada uma das partes interessadas, bem como o Termo de Vistoria e fotos do
-          estado e pertences atuais do imóvel.
+          Assim, por estarem justos e contratados, assinam o presente contrato em 02 (duas) vias de igual teor, na
+          presença das testemunhas abaixo, destinando-se uma via para cada uma das partes interessadas, bem como o
+          Termo de Vistoria e fotos do estado e pertences atuais do imóvel.
         </Text>
 
         {/* Assinaturas */}
@@ -628,7 +661,9 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
           <View style={styles.signLine} />
           <Text style={styles.signLabel}>Locadora: LUCINÉIA APARECIDA DA SILVA INÁCIO</Text>
           <View style={[styles.signLine, { marginTop: 28 }]} />
-          <Text style={styles.signLabel}>Locatário(a): {data.clientName.toUpperCase()}</Text>
+          <Text style={styles.signLabel}>
+            {isPJ(data) ? "Locatária: " : "Locatário(a): "}{data.clientName.toUpperCase()}
+          </Text>
         </View>
       </Page>
     </Document>

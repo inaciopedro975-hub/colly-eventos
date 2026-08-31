@@ -13,8 +13,9 @@ interface Contract {
   id: string;
   type: string; // "decoracao" | "locacao"
   clientName: string;
-  clientCpf: string;
-  clientRg: string;
+  clientDocType: string; // "cpf" | "cnpj"
+  clientCpf: string; // CPF ou CNPJ
+  clientRg: string; // RG ou Inscrição Estadual
   clientAddress: string;
   eventType: string;
   eventStart: string;
@@ -23,6 +24,7 @@ interface Contract {
   serviceDescription?: string | null;
   value: number;
   paymentSignalPct: number;
+  paymentTerms?: string | null;
   paymentInstallments?: number | null;
   paymentInstallmentValue?: number | null;
   extraHourValue?: number | null;
@@ -95,6 +97,17 @@ function maskCPF(v: string) {
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
+// Máscara de CNPJ: 00.000.000/0000-00
+function maskCNPJ(v: string) {
+  return v
+    .replace(/\D/g, "")
+    .slice(0, 14)
+    .replace(/(\d{2})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1/$2")
+    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+}
+
 // Máscara de RG (padrão SP): 00.000.000-0  (último dígito pode ser X)
 function maskRG(v: string) {
   const cleaned = v.replace(/[^\dxX]/g, "").toUpperCase().slice(0, 9);
@@ -104,9 +117,25 @@ function maskRG(v: string) {
     .replace(/(\d{3})([\dX])$/, "$1-$2");
 }
 
+// Inscrição Estadual: livre (varia por estado) — só limita tamanho e deixa aceitar "ISENTO"
+function maskIE(v: string) {
+  return v.toUpperCase().slice(0, 20);
+}
+
+// Documento vem de orçamento sem tipo definido: 14 dígitos = CNPJ
+function docTypeOf(doc: string) {
+  return doc.replace(/\D/g, "").length > 11 ? "cnpj" : "cpf";
+}
+
+// Aplica a máscara certa conforme o tipo de documento
+function maskDoc(v: string, docType: string) {
+  return docType === "cnpj" ? maskCNPJ(v) : maskCPF(v);
+}
+
 const emptyForm = {
   type: "decoracao",
   clientName: "",
+  clientDocType: "cpf",
   clientCpf: "",
   clientRg: "",
   clientAddress: "",
@@ -119,6 +148,7 @@ const emptyForm = {
   serviceDescription: DEFAULT_SERVICES,
   value: "",
   paymentSignalPct: "20",
+  paymentTerms: "",
   paymentInstallments: "",
   paymentInstallmentValue: "",
   extraHourValue: "",
@@ -152,6 +182,18 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
 
   const f = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
 
+  const isPJ = form.clientDocType === "cnpj";
+
+  // Troca CPF ⇄ CNPJ reaproveitando os dígitos já digitados e limpando o RG/IE
+  function changeDocType(docType: "cpf" | "cnpj") {
+    setForm((p) => ({
+      ...p,
+      clientDocType: docType,
+      clientCpf: maskDoc(p.clientCpf, docType),
+      clientRg: "",
+    }));
+  }
+
   const filtered = contracts.filter((c) => {
     const matchSearch =
       c.clientName.toLowerCase().includes(search.toLowerCase()) ||
@@ -178,11 +220,14 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
     setEditTarget(c);
     const start = new Date(c.eventStart);
     const end = new Date(c.eventEnd);
+    // contratos antigos não têm clientDocType: deduz pelo tamanho do documento
+    const docType = c.clientDocType || docTypeOf(c.clientCpf);
     setForm({
       type: c.type,
       clientName: c.clientName,
-      clientCpf: maskCPF(c.clientCpf),
-      clientRg: maskRG(c.clientRg),
+      clientDocType: docType,
+      clientCpf: maskDoc(c.clientCpf, docType),
+      clientRg: docType === "cnpj" ? maskIE(c.clientRg) : maskRG(c.clientRg),
       clientAddress: c.clientAddress,
       eventType: c.eventType,
       eventStartDate: c.eventStart.split("T")[0],
@@ -193,6 +238,7 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
       serviceDescription: c.serviceDescription ?? DEFAULT_SERVICES,
       value: c.value.toString(),
       paymentSignalPct: c.paymentSignalPct.toString(),
+      paymentTerms: c.paymentTerms ?? "",
       paymentInstallments: c.paymentInstallments?.toString() ?? "",
       paymentInstallmentValue: c.paymentInstallmentValue?.toString() ?? "",
       extraHourValue: c.extraHourValue?.toString() ?? "",
@@ -209,6 +255,7 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
     return {
       type: form.type,
       clientName: form.clientName,
+      clientDocType: form.clientDocType,
       clientCpf: form.clientCpf,
       clientRg: form.clientRg,
       clientAddress: form.clientAddress,
@@ -219,6 +266,7 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
       serviceDescription: form.type === "decoracao" ? form.serviceDescription : null,
       value: form.value,
       paymentSignalPct: form.paymentSignalPct,
+      paymentTerms: form.type === "locacao" ? (form.paymentTerms.trim() || null) : null,
       paymentInstallments: form.type === "decoracao" ? (form.paymentInstallments || null) : null,
       paymentInstallmentValue: form.type === "decoracao" ? (form.paymentInstallmentValue || null) : null,
       extraHourValue: form.type === "locacao" ? (form.extraHourValue || null) : null,
@@ -280,11 +328,13 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
 
   function importFromQuote(q: QuoteOption) {
     const eventDate = q.eventDate ? q.eventDate.split("T")[0] : todayISO();
+    const docType = docTypeOf(q.clientDoc ?? "");
     setForm({
       ...emptyForm,
       type: "decoracao",
       clientName: q.clientName,
-      clientCpf: maskCPF(q.clientDoc ?? ""),
+      clientDocType: docType,
+      clientCpf: maskDoc(q.clientDoc ?? "", docType),
       clientRg: "",
       clientAddress: q.clientAddress ?? "",
       eventType: q.eventType ?? "casamento",
@@ -309,6 +359,15 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
     setError("");
     setModalOpen(true);
   }
+
+  // Frase que a Cláusula 3ª da locação recebe quando "Forma de pagamento" fica vazia
+  // (tem que espelhar o fallback do gerador em src/lib/contract-pdf.tsx)
+  const autoPaymentTerms = (() => {
+    const pct = form.paymentSignalPct || "0";
+    const val = parseFloat(form.value);
+    const signal = val ? ` (${formatCurrency(val * (parseFloat(pct) / 100))})` : "";
+    return `entrada de ${pct}%${signal} e o restante parcelado`;
+  })();
 
   // Preview do valor por parcela
   const installmentPreview = (() => {
@@ -374,7 +433,7 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nome ou CPF..."
+            placeholder="Buscar por nome, CPF ou CNPJ..."
             className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-[#ede7dc] text-sm text-[#2a2419] placeholder-[#9b8b73] focus:outline-none focus:border-[#b8860b]"
           />
         </div>
@@ -530,19 +589,41 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
           <div>
             <p className="text-xs font-semibold text-[#946708] uppercase tracking-wide mb-2">👤 Dados do cliente</p>
             <div className="space-y-3">
-              <Input label="Nome completo *" value={form.clientName}
-                onChange={(e) => f("clientName", e.target.value)} required />
-              <div className="grid grid-cols-2 gap-3">
-                <Input label="CPF *" value={form.clientCpf}
-                  onChange={(e) => f("clientCpf", maskCPF(e.target.value))}
-                  inputMode="numeric"
-                  placeholder="000.000.000-00" required />
-                <Input label="RG *" value={form.clientRg}
-                  onChange={(e) => f("clientRg", maskRG(e.target.value))}
-                  inputMode="numeric"
-                  placeholder="00.000.000-0" required />
+              {/* Pessoa física (CPF) ou jurídica (CNPJ) */}
+              <div>
+                <label className="text-sm font-medium text-[#6b5d47]">O cliente é</label>
+                <div className="flex rounded-lg overflow-hidden border border-[#ede7dc] mt-1">
+                  {([
+                    { v: "cpf", label: "Pessoa física (CPF)" },
+                    { v: "cnpj", label: "Pessoa jurídica (CNPJ)" },
+                  ] as const).map((opt) => (
+                    <button key={opt.v} type="button" onClick={() => changeDocType(opt.v)}
+                      className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                        form.clientDocType === opt.v
+                          ? "bg-[#d4a017] text-white"
+                          : "bg-white text-[#6b5d47] hover:bg-[#faf8f3]"
+                      }`}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <Input label="Endereço completo *" value={form.clientAddress}
+
+              <Input label={isPJ ? "Razão social *" : "Nome completo *"} value={form.clientName}
+                onChange={(e) => f("clientName", e.target.value)}
+                placeholder={isPJ ? "Ex.: Colly Eventos Ltda" : ""} required />
+              <div className="grid grid-cols-2 gap-3">
+                <Input label={isPJ ? "CNPJ *" : "CPF *"} value={form.clientCpf}
+                  onChange={(e) => f("clientCpf", maskDoc(e.target.value, form.clientDocType))}
+                  inputMode="numeric"
+                  placeholder={isPJ ? "00.000.000/0000-00" : "000.000.000-00"} required />
+                <Input label={isPJ ? "Inscrição Estadual" : "RG *"} value={form.clientRg}
+                  onChange={(e) => f("clientRg", isPJ ? maskIE(e.target.value) : maskRG(e.target.value))}
+                  inputMode={isPJ ? "text" : "numeric"}
+                  placeholder={isPJ ? "168091340118 ou ISENTO" : "00.000.000-0"}
+                  required={!isPJ} />
+              </div>
+              <Input label={isPJ ? "Endereço da sede *" : "Endereço completo *"} value={form.clientAddress}
                 onChange={(e) => f("clientAddress", e.target.value)}
                 placeholder="Rua, número, bairro, cidade/UF" required />
             </div>
@@ -645,7 +726,7 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
               )}
               {form.type === "locacao" && (
                 <p className="text-[11px] text-[#9b8b73] bg-[#faf8f3] border border-[#ede7dc] rounded-lg px-3 py-2">
-                  ℹ️ O contrato de locação já inclui todas as 24 cláusulas padrão (mesas, cadeiras, regras do espaço, gerador, lei do silêncio etc.). Você só preenche cliente, datas, valor e hora extra.
+                  ℹ️ O contrato de locação já inclui todas as 24 cláusulas padrão (mesas, cadeiras, regras do espaço, gerador, lei do silêncio etc.). Você só preenche cliente, datas, valor, forma de pagamento e hora extra.
                 </p>
               )}
             </div>
@@ -679,16 +760,25 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
                 </>
               )}
 
-              {/* Locação: hora extra + nota do restante */}
+              {/* Locação: forma de pagamento (Cláusula 3ª) + hora extra */}
               {form.type === "locacao" && (
                 <>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-[#6b5d47]">
+                      Forma de pagamento (Cláusula 3ª)
+                    </label>
+                    <textarea value={form.paymentTerms}
+                      onChange={(e) => f("paymentTerms", e.target.value)}
+                      rows={2}
+                      placeholder={autoPaymentTerms}
+                      className="w-full px-3 py-2 rounded-lg bg-white border border-[#d4cdbe] text-[#2a2419] text-sm focus:outline-none focus:border-[#b8860b] resize-y" />
+                    <p className="text-[11px] text-[#9b8b73]">
+                      Entra no contrato exatamente como você escrever. Se deixar vazio, vira:{" "}
+                      <em>{autoPaymentTerms}</em>
+                    </p>
+                  </div>
                   <CurrencyInput label="Valor da hora extra (Cláusula 4ª)" value={form.extraHourValue}
                     onChange={(v) => f("extraHourValue", v)} />
-                  <p className="text-xs text-[#946708] bg-[#fef9ec] border border-[#f0d060] rounded-lg px-3 py-2">
-                    💡 Pagamento: entrada de <strong>{form.paymentSignalPct}%</strong>
-                    {form.value && <> (<strong>{formatCurrency(parseFloat(form.value) * (parseFloat(form.paymentSignalPct || "0") / 100))}</strong>)</>}
-                    {" "}na assinatura, restante até 30 dias antes do evento.
-                  </p>
                 </>
               )}
             </div>
@@ -712,6 +802,16 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
             </p>
             <div className="bg-[#faf8f3] border border-[#ede7dc] rounded-xl p-3 space-y-2 text-xs text-[#2a2419] leading-relaxed">
               <p>
+                <span className="font-semibold text-[#946708]">
+                  {form.type === "locacao" ? (isPJ ? "LOCATÁRIA — " : "LOCATÁRIO(A) — ") : "CONTRATANTE — "}
+                </span>
+                <strong>{form.clientName.toUpperCase() || "________"}</strong>,{" "}
+                {isPJ
+                  ? <>pessoa jurídica de direito privado, inscrita no CNPJ sob nº {form.clientCpf || "__.___.___/____-__"}
+                      {form.clientRg && ` e I.E nº ${form.clientRg}`}, com sede na {form.clientAddress || "________"}.</>
+                  : <>portador(a) do RG nº {form.clientRg || "__.___.___-_"}, devidamente inscrito(a) no CPF nº {form.clientCpf || "___.___.___-__"}, residente e domiciliado(a) na {form.clientAddress || "________"}.</>}
+              </p>
+              <p>
                 <span className="font-semibold text-[#946708]">Cláusula 1ª — </span>
                 {form.type === "locacao"
                   ? `A locação se iniciará às ${form.eventStartTime} horas do dia ${brDate(form.eventStartDate)} e a terminar às ${form.eventEndTime} horas do dia ${brDate(form.eventEndDate)}.`
@@ -727,7 +827,7 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
                   <>
                     valor de <strong>{formatCurrency(parseFloat(form.value))}</strong>
                     {form.type === "locacao"
-                      ? <>, entrada de {form.paymentSignalPct}% (<strong>{formatCurrency(parseFloat(form.value) * (parseFloat(form.paymentSignalPct || "0") / 100))}</strong>) na assinatura, restante até 30 dias antes do evento.</>
+                      ? <>, a pagar da seguinte forma: <strong>{form.paymentTerms.trim() || autoPaymentTerms}</strong>.</>
                       : <>, sinal de {form.paymentSignalPct}% na assinatura{form.paymentInstallments ? ` + ${form.paymentInstallments} parcelas do saldo.` : "."}</>}
                   </>
                 ) : (
@@ -761,7 +861,7 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
       <Modal open={importOpen} onClose={() => setImportOpen(false)} title="Importar de orçamento aprovado">
         <div className="space-y-2">
           <p className="text-xs text-[#9b8b73] mb-3">
-            Os dados do cliente (nome, CPF, endereço) e o valor virão preenchidos. Você completa o RG, ajusta data/hora e revisa antes de gerar.
+            Os dados do cliente (nome, CPF/CNPJ, endereço) e o valor virão preenchidos. Você completa o RG (ou a Inscrição Estadual), ajusta data/hora e revisa antes de gerar.
           </p>
           {quotesAprovados.length === 0 ? (
             <p className="text-sm text-[#9b8b73] text-center py-6">Nenhum orçamento aprovado disponível.</p>
