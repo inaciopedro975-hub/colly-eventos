@@ -11,26 +11,34 @@ import { readFileSync, readdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { createClient } from "@libsql/client";
-import "dotenv/config";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 
-// Carrega .env.production se existir (sem sobrescrever env já definida)
-const envFile = join(root, ".env.production");
-if (existsSync(envFile)) {
-  for (const line of readFileSync(envFile, "utf8").split(/\r?\n/)) {
+// Lê um arquivo .env sem mexer no process.env
+function lerEnv(arquivo) {
+  const vars = {};
+  if (!existsSync(arquivo)) return vars;
+  for (const line of readFileSync(arquivo, "utf8").split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*"?([^"]*)"?\s*$/);
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
+    if (m) vars[m[1]] = m[2];
   }
+  return vars;
 }
 
-const url = process.env.DATABASE_URL;
-const authToken = process.env.TURSO_AUTH_TOKEN;
+// Este script é só para produção: o .env.production manda, e não o .env local
+// (que aponta para o dev.db). Variáveis já exportadas no shell têm prioridade.
+const prod = lerEnv(join(root, ".env.production"));
+const url = process.env.DATABASE_URL_PROD || prod.DATABASE_URL;
+const authToken = process.env.TURSO_AUTH_TOKEN || prod.TURSO_AUTH_TOKEN;
 
 if (!url || !url.startsWith("libsql://")) {
   console.error("❌ DATABASE_URL precisa ser uma URL do Turso (libsql://...).");
-  console.error("   Configure no .env.production ou exporte a variável antes de rodar.");
+  console.error("   Preencha DATABASE_URL e TURSO_AUTH_TOKEN no .env.production");
+  console.error("   com os valores reais do painel da Hostinger.");
+  if (String(url).includes("SEU-BANCO")) {
+    console.error('   (o valor atual, "libsql://SEU-BANCO.turso.io", é só um exemplo)');
+  }
   process.exit(1);
 }
 if (!authToken) {
@@ -46,8 +54,23 @@ const dirs = readdirSync(migrationsDir, { withFileTypes: true })
   .map((d) => d.name)
   .sort(); // ordem cronológica (prefixo de data)
 
-console.log(`\n🔗 Conectado ao Turso: ${url}`);
+console.log(`\n🔗 Turso: ${url}`);
 console.log(`📂 ${dirs.length} migrations encontradas\n`);
+
+// Testa a conexão antes de qualquer escrita, para não falhar no meio do caminho
+try {
+  await client.execute("SELECT 1");
+} catch (err) {
+  console.error(`❌ Não consegui conectar no banco de produção.\n   ${err.message}\n`);
+  if (String(url).includes("SEU-BANCO")) {
+    console.error("   O DATABASE_URL do .env.production ainda é o texto de exemplo.");
+    console.error("   Pegue a URL e o token reais nas variáveis de ambiente do painel");
+    console.error("   da Hostinger e cole no .env.production (ele é ignorado pelo git).\n");
+  } else {
+    console.error("   Confira a URL e o TURSO_AUTH_TOKEN no .env.production.\n");
+  }
+  process.exit(1);
+}
 
 // Tabela de controle (idempotência)
 await client.executeMultiple(`
