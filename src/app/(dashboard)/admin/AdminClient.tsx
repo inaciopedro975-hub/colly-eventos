@@ -162,8 +162,11 @@ export function AdminClient({ initialUsers }: Props) {
         </Button>
       </div>
 
+      {/* overflow-x-auto: no celular a tabela é mais larga que a tela; sem isso
+          ela empurra a página inteira para os lados em vez de rolar sozinha. */}
       <div className="bg-[#ffffff] border border-[#f5f1ea] rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[560px]">
           <thead>
             <tr className="border-b border-[#f5f1ea]">
               <th className="text-left px-5 py-3 text-xs font-semibold text-[#9b8b73] uppercase tracking-wider">Usuário</th>
@@ -231,6 +234,7 @@ export function AdminClient({ initialUsers }: Props) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Novo Usuário">

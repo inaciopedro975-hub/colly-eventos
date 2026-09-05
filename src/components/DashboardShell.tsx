@@ -6,11 +6,15 @@ import { Menu } from "lucide-react";
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // h-dvh (e não h-screen/100vh): no celular a barra de endereço aparece e some
+  // ao rolar, mudando o 100vh e fazendo o layout inteiro tremer.
+  // min-w-0 no main: sem isso o item flex não encolhe abaixo da largura do
+  // conteúdo, e qualquer elemento largo empurra a página para os lados.
   return (
-    <div className="flex h-screen overflow-hidden bg-[#faf8f3]">
+    <div className="flex h-dvh overflow-hidden bg-[#faf8f3]">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 min-w-0 overflow-y-auto">
         {/* Barra superior mobile com botão hambúrguer */}
         <div className="lg:hidden sticky top-0 z-20 bg-[#faf8f3] border-b border-[#ede7dc] px-4 py-3 flex items-center gap-3">
           <button

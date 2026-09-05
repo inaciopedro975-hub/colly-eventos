@@ -521,10 +521,15 @@ export function ContractsClient({ initialContracts, quotesAprovados, bookedEvent
 
                   {/* Ícones: sempre visíveis no celular, aparecem no hover no desktop */}
                   <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                    <a href={`/api/contracts/${c.id}/pdf`} target="_blank" rel="noopener noreferrer" title="Baixar PDF">
-                      <button className="p-2 rounded-lg text-[#9b8b73] hover:text-[#d4a017] hover:bg-[#fef9ec] transition-colors">
-                        <Download size={15} />
-                      </button>
+                    {/* Link direto, sem target="_blank" e sem <button> dentro:
+                        no celular o toque no botão não acionava o link e o popup era bloqueado. */}
+                    <a
+                      href={`/api/contracts/${c.id}/pdf`}
+                      download
+                      title="Baixar PDF"
+                      className="p-2 rounded-lg text-[#9b8b73] hover:text-[#d4a017] hover:bg-[#fef9ec] transition-colors inline-flex items-center justify-center"
+                    >
+                      <Download size={15} />
                     </a>
                     <button
                       onClick={() => openEdit(c)}

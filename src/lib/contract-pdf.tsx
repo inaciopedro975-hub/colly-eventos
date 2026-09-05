@@ -28,19 +28,33 @@ export interface ContractPDFData {
   signDate: Date;
 }
 
-const styles = StyleSheet.create({
+/**
+ * Cria um conjunto de estilos a partir das medidas de tipografia.
+ * Existe para o contrato de locação poder ter a diagramação folgada do modelo
+ * assinado (letra e espaçamento de Word) sem alterar o de decoração.
+ */
+function criarEstilos(m: {
+  fontSize: number;
+  lineHeight: number;
+  paddingV: number;
+  paddingH: number;
+  titleSize: number;
+  paragraphGap: number;
+  sectionGap: number;
+}) {
+  return StyleSheet.create({
   page: {
-    paddingTop: 50,
-    paddingBottom: 50,
-    paddingHorizontal: 60,
-    fontSize: 10.5,
+    paddingTop: m.paddingV,
+    paddingBottom: m.paddingV,
+    paddingHorizontal: m.paddingH,
+    fontSize: m.fontSize,
     fontFamily: "Times-Roman",
-    lineHeight: 1.4,
+    lineHeight: m.lineHeight,
     color: "#000",
   },
   title: {
     fontFamily: "Times-Bold",
-    fontSize: 11,
+    fontSize: m.titleSize,
     textAlign: "center",
     padding: 6,
     borderWidth: 1,
@@ -49,24 +63,24 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     fontFamily: "Times-Bold",
-    fontSize: 10.5,
+    fontSize: m.fontSize,
     padding: 4,
     borderWidth: 1,
     borderColor: "#000",
-    marginTop: 10,
-    marginBottom: 8,
+    marginTop: m.sectionGap,
+    marginBottom: m.sectionGap * 0.8,
   },
   paragraph: {
     textAlign: "justify",
-    marginBottom: 6,
+    marginBottom: m.paragraphGap,
   },
   clauseLabel: {
     fontFamily: "Times-Bold",
   },
   intro: {
     textAlign: "justify",
-    marginTop: 6,
-    marginBottom: 6,
+    marginTop: m.paragraphGap,
+    marginBottom: m.paragraphGap,
   },
   servicesBlock: {
     marginLeft: 24,
@@ -107,8 +121,31 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   witnessText: {
-    fontSize: 9.5,
+    fontSize: m.fontSize - 1,
   },
+  });
+}
+
+// Decoração: diagramação compacta original (não mexer sem pedido)
+const styles = criarEstilos({
+  fontSize: 10.5,
+  lineHeight: 1.4,
+  paddingV: 50,
+  paddingH: 60,
+  titleSize: 11,
+  paragraphGap: 6,
+  sectionGap: 10,
+});
+
+// Locação: medidas ajustadas para bater com o modelo assinado (6 páginas)
+const stylesLocacao = criarEstilos({
+  fontSize: 12,
+  lineHeight: 1.6,
+  paddingV: 60,
+  paddingH: 48,
+  titleSize: 12,
+  paragraphGap: 14,
+  sectionGap: 18,
 });
 
 function fmtDate(d: Date) {
@@ -390,6 +427,7 @@ function DecoracaoContract({ data }: { data: ContractPDFData }) {
    CONTRATO DE LOCAÇÃO TEMPORÁRIA DE AMBIENTE PARA FESTAS E EVENTOS
    ───────────────────────────────────────────────────────────── */
 function LocacaoContract({ data }: { data: ContractPDFData }) {
+  const s = stylesLocacao;
   const signalValue = data.value * (data.paymentSignalPct / 100);
   const extraTxt = data.extraHourValue
     ? fmtCurrency(data.extraHourValue)
@@ -402,92 +440,92 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>CONTRATO DE LOCAÇÃO TEMPORÁRIA DE AMBIENTE PARA FESTAS E EVENTOS</Text>
+      <Page size="A4" style={s.page}>
+        <Text style={s.title}>CONTRATO DE LOCAÇÃO TEMPORÁRIA DE AMBIENTE PARA FESTAS E EVENTOS</Text>
 
         {/* PARTES */}
-        <Text style={styles.sectionHeader}>PARTES</Text>
+        <Text style={s.sectionHeader}>PARTES</Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>LOCADORA: LUCINÉIA APARECIDA DA SILVA INÁCIO MEI, </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>LOCADORA: LUCINÉIA APARECIDA DA SILVA INÁCIO MEI, </Text>
           inscrita no CNPJ sob nº 26.209.953/0001-58 e I. E nº 168091340118, Chácara Colly Eventos,
           situada na Estrada dos Pereiras, em Amparo/SP.
         </Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>
             {isPJ(data) ? "LOCATÁRIA: " : "LOCATÁRIO(A): "}{data.clientName.toUpperCase()},{" "}
           </Text>
           <ClientQualification data={data} />
         </Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>IMÓVEL: </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>IMÓVEL: </Text>
           Chácara Colly Eventos, situada na Estrada dos Pereiras, em Amparo/SP.
         </Text>
 
-        <Text style={styles.intro}>
+        <Text style={s.intro}>
           Pelo presente instrumento particular, as partes contratantes têm, entre si, justo e contratado o seguinte,
           que mutuamente aceitam e acordam, a saber:
         </Text>
 
         {/* CONDIÇÕES DA LOCAÇÃO */}
-        <Text style={styles.sectionHeader}>CONDIÇÕES DA LOCAÇÃO</Text>
+        <Text style={s.sectionHeader}>CONDIÇÕES DA LOCAÇÃO</Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 1ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 1ª. </Text>
           A locação se iniciará às {fmtTime(data.eventStart)} horas do dia {fmtDate(data.eventStart)} e a terminar
           às {fmtTime(data.eventEnd)} horas do dia {fmtDate(data.eventEnd)}, data em que o LOCATÁRIO obriga-se a
           restituir o imóvel desocupado, independentemente de qualquer aviso ou notificação, com trinta minutos de
           tolerância, sem nenhum custo adicional;
         </Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 2ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 2ª. </Text>
           O imóvel objeto da presente locação destina-se exclusivamente para a realização de evento {data.eventType},
           não podendo sua destinação ser mudada sem o consentimento expresso da LOCADORA;
         </Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 3ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 3ª. </Text>
           O valor do aluguel é de {fmtCurrency(data.value)} que o LOCATÁRIO se compromete a pagar da seguinte forma:
           {" "}{paymentTxt}
         </Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 4ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 4ª. </Text>
           Quando por opção do LOCATÁRIO, houver a intenção da contratação de horas extras, este deverá comunicar à
           LOCADORA e providenciar o pagamento do valor contratado meia hora antes do horário firmado na locação inicial.
           O valor correspondente a cada hora extra é de {extraTxt}.
         </Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 5ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 5ª. </Text>
           Caso haja necessidade de alteração da data do evento, a transferência será permitida desde que haja outra
           data disponível e que os valores sejam atualizados. Esta possível transferência só será permitida se informada
           até 6 meses antes da realização do evento. Após este prazo, será cobrada uma taxa de transferência referente
           a 60% do valor do novo contrato, e o contrato anterior deverá ser quitado.
         </Text>
 
-        <Text style={styles.sectionHeader}>DA RESCISÃO DO CONTRATO</Text>
+        <Text style={s.sectionHeader}>DA RESCISÃO DO CONTRATO</Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 6ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 6ª. </Text>
           No caso da rescisão contratual ocorrer por parte do LOCATÁRIO em até 12 meses antes do evento, o valor das
           parcelas pagas deverá ser restituído. No caso da rescisão ocorrer no prazo inferior a 12 meses da data
           contratada, não haverá restituição dos valores já pagos pelo LOCATÁRIO até o momento da rescisão. As parcelas
           vencidas e não quitadas deverão ser pagas na ocasião.
         </Text>
 
-        <Text style={styles.sectionHeader}>CONSERVAÇÃO DO IMÓVEL</Text>
+        <Text style={s.sectionHeader}>CONSERVAÇÃO DO IMÓVEL</Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 7ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 7ª. </Text>
           Incumbe ao LOCATÁRIO a conservação geral do imóvel, de forma a devolvê-lo, finda a locação, no perfeito estado
           em que ora o recebe, devendo o mesmo estar desocupado de pessoas e objetos.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Parágrafo primeiro. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Parágrafo primeiro. </Text>
           O LOCATÁRIO declara ter vistoriado o imóvel antes da locação, verificando pessoalmente encontrar-se o mesmo
           de acordo com o Termo de vistoria e fotos em anexo, momento em que serão esclarecidas todas as dúvidas quanto
           ao uso, capacidade e disponibilidades. Obriga-se a restituir o imóvel finda a locação, no estado
@@ -500,35 +538,35 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
           os danos existentes inviabilizem as próximas locações.
         </Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 8ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 8ª. </Text>
           Ocorrendo qualquer dano no imóvel, o LOCATÁRIO deverá indenizar os reparos de imediato, assim que lhe
           apresentada nota de custo para devidos reparos e, se o caso, do aluguel dos dias em que o imóvel não puder
           ser novamente utilizado.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Parágrafo primeiro. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Parágrafo primeiro. </Text>
           Antes de conectar qualquer aparelho elétrico ou eletrônico nas tomadas do imóvel, o LOCATÁRIO deverá verificar
           a sua voltagem, evitando-se qualquer dano daí decorrente.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Parágrafo segundo. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Parágrafo segundo. </Text>
           Não é permitido comer e beber na piscina, bem como a utilização de bronzeadores e qualquer objeto cortante ou perfurante.
         </Text>
 
-        <Text style={styles.sectionHeader}>TRANSFERÊNCIA E SUBLOCAÇÃO</Text>
+        <Text style={s.sectionHeader}>TRANSFERÊNCIA E SUBLOCAÇÃO</Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 9ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 9ª. </Text>
           Não é permitida a transferência deste contrato, nem a sublocação, cessão ou empréstimo total ou parcial do
           imóvel, sem prévio consentimento por escrito da LOCADORA, devendo no caso deste ser dado, agir oportunamente
           junto aos ocupantes, a fim de que o imóvel esteja desimpedido no termo do presente contrato.
         </Text>
 
-        <Text style={styles.sectionHeader}>PENALIDADES</Text>
+        <Text style={s.sectionHeader}>PENALIDADES</Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 10ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 10ª. </Text>
           O não pagamento do valor acordado dentro dos prazos fixados importará na incidência de juros de mora de 1% ao
           mês ou fração, atualização monetária e multa moratória de 20% (vinte por cento), sendo que tais acréscimos serão
           pagos juntamente com o principal, sem prejuízo do vencimento antecipado do débito no caso de vencimento de duas
@@ -536,111 +574,111 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
           do saldo devedor. Em caso de intervenção de advogado, judicial ou extrajudicialmente, mais honorários advocatícios
           de 20% sobre o valor do débito.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 11ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 11ª. </Text>
           A parte que infringir qualquer das cláusulas deste contrato, ficará obrigada ao pagamento de multa correspondente
           a 03 (três) aluguéis, nos valores em que estiverem vigorando, podendo a parte contrária considerar simultaneamente
           rescindida a locação, independentemente de qualquer formalidade.
         </Text>
 
-        <Text style={styles.sectionHeader}>FORO</Text>
+        <Text style={s.sectionHeader}>FORO</Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 12ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 12ª. </Text>
           As partes elegem o foro desta Comarca de Amparo/SP, com renúncia de qualquer outro, para procedimento judicial
           decorrente deste contrato, sendo os casos nele omissos dirimidos de conformidade com a legislação vigente.
           A citação, a intimação e a notificação poderão ser efetuadas pelo correio, e, em caso de pessoa jurídica,
           também por fac-símile.
         </Text>
 
-        <Text style={styles.sectionHeader}>OUTRAS CLÁUSULAS</Text>
+        <Text style={s.sectionHeader}>OUTRAS CLÁUSULAS</Text>
 
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 13ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 13ª. </Text>
           O LOCATÁRIO não poderá furar as paredes do imóvel, sem o consentimento expresso da LOCADORA.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 14ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 14ª. </Text>
           O LOCATÁRIO declara conhecer a legislação municipal utilizando o imóvel de acordo com as exigências da Lei,
           em especial quanto à intensidade do som (lei do silêncio – das 22h às 7h); permanência de menores; uso de
           bebidas; cumprindo ainda a política da boa vizinhança, não incomodando terceiros, na proximidade da locação.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Parágrafo segundo. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Parágrafo segundo. </Text>
           Os horários e programações serão definidos pelos organizadores, havendo apenas a ressalva quanto ao horário e
           volume do som, respeitando a "LEI DO SILÊNCIO" das 22h às 07h da manhã.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 15ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 15ª. </Text>
           O LOCATÁRIO e seus responsáveis deverão estar atentos aos menores para evitar qualquer tipo de acidente, não
           havendo qualquer responsabilidade por parte da LOCADORA.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 16ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 16ª. </Text>
           São de responsabilidade do LOCATÁRIO toda montagem da festa, como mesas, cadeiras, enfeites, produtos de
           higiene e limpeza, som, iluminação (que não seja a já existente no local), roupas de cama, cobertores entre outros.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Parágrafo 1º. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Parágrafo 1º. </Text>
           O LOCADOR não fornecerá: a) serviços e fornecimento de alimentação, som, iluminação e decoração. O LOCATÁRIO
           deverá contratar os serviços que necessitar, ficando responsável por qualquer dano causado por seus contratados.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Parágrafo 2º. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Parágrafo 2º. </Text>
           O LOCADOR fornecerá: a) materiais de limpeza como sabão, desinfetante e pano de chão ou de prato, papel
           higiênico, sanito e sabonete para as mãos; b) 20 mesas, 200 cadeiras, toalhas e uma pessoa responsável pela
           limpeza dos banheiros durante o evento.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Parágrafo 3º. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Parágrafo 3º. </Text>
           A LOCADORA também não se responsabiliza por qualquer objeto esquecido ou perdido durante o evento; se
           encontrado será guardado e entregue ao reclamante ou ao LOCATÁRIO.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 17ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 17ª. </Text>
           O uso de chuveiro, torneiras, descarga e energia elétrica deve ser racional, evitando desperdício.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 18ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 18ª. </Text>
           É de responsabilidade do LOCATÁRIO a organização básica das dependências, colocando todo o lixo em sacos
           fechados nos locais para isso destinados, retirando sobras de alimento e de decoração, recolocando móveis e
           objetos em seus locais originais, desligando luzes, verificando fechamento de torneiras, janelas e portas.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 19ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 19ª. </Text>
           O respeito deve ser observado de acordo com os princípios da consciência ecológica, colocando lixo e bitucas
           de cigarro em locais apropriados e não agredindo árvores, plantas, frutas e flores, como também pequenos
           animais próprios do local — passarinhos, saguis, esquilos e outros.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 20ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 20ª. </Text>
           A LOCADORA não se responsabiliza por catástrofes naturais e falta de energia elétrica ocorrida antes e durante
           o período de locação. Na ocorrência de qualquer fato que impossibilite a utilização da chácara, a LOCADORA se
           prontificará a disponibilizar outra data para realização do evento, sem custos adicionais para ambas as partes.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Parágrafo 1º. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Parágrafo 1º. </Text>
           Salienta-se que a chácara possui um gerador para ser utilizado em caso de falta de energia, com duração de
           aproximadamente 04 horas, conectado às lâmpadas do salão principal e com uma conexão para aparelho de som.
           Observação: o gerador não alimenta painel de led, pista paris e fritadeira.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 21ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 21ª. </Text>
           No caso de desapropriação do imóvel locado, ficará a LOCADORA desobrigada por todas as cláusulas deste contrato,
           ressalvada aos LOCATÁRIOS tão somente a faculdade de haver do poder desapropriante a indenização a que,
           porventura, tiver direito;
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 22ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 22ª. </Text>
           A vistoria na entrega das chaves e a limpeza de todas as dependências utilizadas são de responsabilidade da LOCADORA.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 23ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 23ª. </Text>
           Nenhuma intimação do serviço sanitário será motivo para o LOCATÁRIO abandonar o imóvel ou pedir rescisão deste
           contrato, salvo procedendo vistoria judicial, que apure estar a construção ameaçando ruir.
         </Text>
-        <Text style={styles.paragraph}>
-          <Text style={styles.clauseLabel}>Cláusula 24ª. </Text>
+        <Text style={s.paragraph}>
+          <Text style={s.clauseLabel}>Cláusula 24ª. </Text>
           Será exigido bom comportamento e, havendo reclamação da vizinhança sobre qualquer conduta que venha a ferir
           qualquer artigo presente na Constituição Brasileira, Código Civil ou Código Penal Brasileiro, será apurado e o
           LOCATÁRIO responderá em juízo pelos atos cometidos durante o evento, tornando a LOCADORA isenta de qualquer
@@ -649,19 +687,19 @@ function LocacaoContract({ data }: { data: ContractPDFData }) {
           obedecido, poderá acionar a autoridade competente.
         </Text>
 
-        <Text style={styles.intro}>
+        <Text style={s.intro}>
           Assim, por estarem justos e contratados, assinam o presente contrato em 02 (duas) vias de igual teor, na
           presença das testemunhas abaixo, destinando-se uma via para cada uma das partes interessadas, bem como o
           Termo de Vistoria e fotos do estado e pertences atuais do imóvel.
         </Text>
 
         {/* Assinaturas */}
-        <View style={styles.signatureBlock}>
-          <Text style={styles.signDate}>{data.signCity}, {fmtSignDate(data.signDate)}</Text>
-          <View style={styles.signLine} />
-          <Text style={styles.signLabel}>Locadora: LUCINÉIA APARECIDA DA SILVA INÁCIO</Text>
-          <View style={[styles.signLine, { marginTop: 28 }]} />
-          <Text style={styles.signLabel}>
+        <View style={s.signatureBlock}>
+          <Text style={s.signDate}>{data.signCity}, {fmtSignDate(data.signDate)}</Text>
+          <View style={s.signLine} />
+          <Text style={s.signLabel}>Locadora: LUCINÉIA APARECIDA DA SILVA INÁCIO</Text>
+          <View style={[s.signLine, { marginTop: 28 }]} />
+          <Text style={s.signLabel}>
             {isPJ(data) ? "Locatária: " : "Locatário(a): "}{data.clientName.toUpperCase()}
           </Text>
         </View>
